@@ -1,31 +1,11 @@
 from argparse import ArgumentParser
 
-from asr_attack import AsrAttack
+from asr_attack import AsrAttack, ATTACK_PARAMS
 
 
 def main(args):
 
-    attack_params = {
-        'global_max_length':200000,
-        'initial_eps':0.001,
-        'max_iter_1st_stage':100,
-        'max_iter_2nd_stage':100,
-        'learning_rate_1st_stage':0.00001,
-        'learning_rate_2nd_stage':0.0000001,
-        'initial_rescale':1.0,
-        'rescale_factor':0.99,
-        'num_iter_adjust_rescale':50,
-        'initial_alpha':0.001,
-        'increase_factor_alpha':1.1,
-        'num_iter_increase_alpha':500,
-        'decrease_factor_alpha':0.9,
-        'num_iter_decrease_alpha':500,
-        'batch_size':1,
-        'use_amp':False,
-        'opt_level':"O1",
-    }
-
-    my_asr_attack = AsrAttack(**attack_params, debug=True)
+    my_asr_attack = AsrAttack(**ATTACK_PARAMS, debug=True)
     my_asr_attack.generate_adv_example(input_path=args.input_path, 
                                        target=args.target, 
                                        output_path=args.output_path)
