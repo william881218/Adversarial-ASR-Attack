@@ -3,8 +3,8 @@ import pathlib
 import os
 
 import numpy as np
-import soundfile as sf
 import librosa
+from scipy.io import wavfile
 
 import torch
 from art.estimators.speech_recognition.pytorch_deep_speech import PyTorchDeepSpeech
@@ -24,7 +24,10 @@ class AsrAttack():
 
     SAMPLE_RATE = 16000
 
-    def __init__(self, pretrained_model="librispeech", gpus="0", **attack_kwargs):
+    def __init__(self, pretrained_model="librispeech", 
+                       gpus="0",
+                       debug=False, 
+                       **attack_kwargs):
         '''
         Create a class `.AsrAttack` instance.
 
@@ -34,6 +37,7 @@ class AsrAttack():
                                      and `tedlium`, representing which dataset the model was trained with.
             gpus (str) : assign specific gpu to use. Default is "0". 
                          If gpu is unavailable, use cpu instead.
+            debug (bool) : whether to print the debug message
             attack_kwargs (dict) : arguments for attack parameters. Read the documentation below.
 
             Args for `attack_kwargs`:
@@ -73,21 +77,26 @@ class AsrAttack():
                                   values are `O0`, `O1`, `O2`, and `O3`.
         '''
 
+        self.pretrained_model = pretrained_model
+        self.gpus = gpus
+        self.debug = debug
+        self.attack_kwargs = attack_kwargs
+
         # set gpu device here
         if torch.cuda.is_available():
-            os.environ["CUDA_VISIBLE_DEVICES"] = gpus
-            device_type = "gpu"
+            os.environ["CUDA_VISIBLE_DEVICES"] = self.gpus
+            self.device_type = "gpu"
         else:
-            device_type = "cpu"
+            self.device_type = "cpu"
 
         # TODO : Set up optimizer in `attack_kwargs`
 
         # initialize target asr model
-        self.asr_model = PyTorchDeepSpeech(pretrained_model=pretrained_model,
-                                           device_type=device_type)
+        self.asr_model = PyTorchDeepSpeech(pretrained_model=self.pretrained_model,
+                                           device_type=self.device_type)
 
         # attack!
-        self.asr_attack = ImperceptibleASRPyTorch(estimator=self.asr_model, **attack_kwargs)
+        self.asr_attack = ImperceptibleASRPyTorch(estimator=self.asr_model, **self.attack_kwargs)
 
     
     def load_audio(self, path):
@@ -106,29 +115,36 @@ class AsrAttack():
         Save audio file. Will be rescaled in 16-bits integer.
         '''
 
-        sf.write(path, audio, AsrAttack.SAMPLE_RATE)
+        wavfile.write(path, AsrAttack.SAMPLE_RATE, audio)
 
 
     def generate_adv_example(self, input_path, target, output_path):
+        '''
+        Generate adversarial example.
+
+        Args:
+            input_path (str) : the path of audio being attacked.
+            target (str) : target output in capital letter. Ex: "OPEN THE DOOR".
+            output_path (str) : the path where targeted audio is stored.
+        '''
         
         audio = self.load_audio(input_path)
-        prediction = self.asr_model.predict(np.array([audio]), transcription_output=True)
-
-        print('input path:', input_path)
-        print('original prediction:', prediction)
-        print('target:', target, flush=True)
+        prediction = self.asr_model.predict(np.array([audio]), batch_size=1, transcription_output=True)
+        if self.debug:
+            print('input path:', input_path)
+            print('original prediction:', prediction)
+            print('target:', target)
 
         # start generating adv example
         adv_audio, first_step_audio = self.asr_attack.generate(np.array([audio]), np.array([target]), batch_size=1)
 
+        # check the transcription of targeted audio
         adv_transcriptions = self.asr_model.predict(adv_audio, batch_size=1, transcription_output=True)
-        first_step_trans = self.asr_model.predict(first_step_audio, batch_size=1, transcription_output=True)
         print("Groundtruth transcriptions: ", prediction)
         print("Target      transcriptions: ", target)
         print("Adversarial transcriptions: ", adv_transcriptions)
-        print("First Step transcriptions: ", first_step_trans)
 
         # save adv audio
         self.save_audio(output_path, adv_audio[0])
-        self.save_audio(output_path[:-4] + '_first.wav', first_step_audio[0])
-        print('output_path:', output_path)
+        if self.debug:
+            print('Generated audio stored at:', output_path)
