@@ -18,13 +18,19 @@ Generate adversarial audio example ([paper link](https://arxiv.org/pdf/1903.1034
 - Demo
 <img src='README/demo.png'>
 
-- Note that the art_toolbox used in the code is from [here](https://github.com/Trusted-AI/adversarial-robustness-toolbox), but several modification, including bug fixing have been made in my version of art_toolbox. Therefore, the art_toolbox forked in my repo is needed. I'll update the instruction for installation soon.
-
 ## Getting Started
 
-### Dependency
-- Will be uploaded soon.
+### Installing
 
-### Installing & Excecuting
+- Installation via dockerfile is under devlopment.
+- Use `pip install -r requirements.txt` to install dependency.
+- Note that `deepspeech_pytorch` needs manual installation. Check [here](https://github.com/SeanNaren/deepspeech.pytorch) for more information.
+- Note that the art_toolbox used in the code is from [here](https://github.com/Trusted-AI/adversarial-robustness-toolbox), but several modification, including bug fixing have been made in my version of art_toolbox. Therefore, the [art_toolbox](https://github.com/william881218/adversarial-robustness-toolbox) forked in my repo is needed.
 
-* The docker image of this application will be uploaded soon.
+### Executing
+- For CLI, use the following command to generate adversarial example:
+```python
+python3 generate_adv_exp.py [-h] [-i INPUT_PATH] [-t TARGET] [-o OUTPUT_PATH]
+```
+- For GUI, `python app.py` will run the service on the localhost with 9527 port.
+    - The service will run automatically when docker is initiated.
