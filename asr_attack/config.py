@@ -1,7 +1,7 @@
 ATTACK_PARAMS = {
     'global_max_length':200000,
-    'initial_eps':0.001,
-    'max_iter_1st_stage':100,
+    'initial_eps':0.1,
+    'max_iter_1st_stage':300,
     'max_iter_2nd_stage':100,
     'learning_rate_1st_stage':0.00001,
     'learning_rate_2nd_stage':0.0000001,

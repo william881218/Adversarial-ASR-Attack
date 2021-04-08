@@ -136,7 +136,7 @@ class AsrAttack():
             print('target:', target)
 
         # start generating adv example
-        adv_audio, first_step_audio = self.asr_attack.generate(np.array([audio]), np.array([target]), batch_size=1)
+        adv_audio = self.asr_attack.generate(np.array([audio]), np.array([target]), batch_size=1)
 
         # check the transcription of targeted audio
         adv_transcriptions = self.asr_model.predict(adv_audio, batch_size=1, transcription_output=True)

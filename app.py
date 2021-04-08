@@ -29,12 +29,19 @@ def main_page():
 
 
 @app.route('/corpus/7.wav', methods=['GET'])
-def download_corpus():
+def download_corpus_7():
     '''
-    Responsible for downloading audio corpuses. 
-    Currently only 7.wav is available.
+    Responsible for downloading 7.wav.
     '''
     return send_file(os.path.join(app.config["ROOT_DIR"], "corpus/7.wav"), as_attachment=True)
+
+
+@app.route('/corpus/0.wav', methods=['GET'])
+def download_corpus_0():
+    '''
+    Responsible for downloading 0.wav. 
+    '''
+    return send_file(os.path.join(app.config["ROOT_DIR"], "corpus/0.wav"), as_attachment=True)
 
 
 @app.route('/perturbed_audio', methods=['GET'])
@@ -71,7 +78,7 @@ def attack():
     # instantiate keyword spotting service singleton and get prediction
     my_asr_attack = AsrAttack(**ATTACK_PARAMS)
     my_asr_attack.generate_adv_example(input_path=uploaded_path,
-                                       target=target_phrase, 
+                                       target=target_phrase.upper(), 
                                        output_path=app.config['OUTPUT_PATH'])
     
     # we don't need the audio file any more - let's delete it!
@@ -129,4 +136,4 @@ def asr():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port='9527')
+    app.run(debug=True, host='0.0.0.0', port='9999')
