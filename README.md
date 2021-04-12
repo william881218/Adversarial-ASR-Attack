@@ -34,3 +34,6 @@ python3 generate_adv_exp.py [-h] [-i INPUT_PATH] [-t TARGET] [-o OUTPUT_PATH]
 ```
 - For GUI, `python app.py` will run the service on the localhost with 9527 port.
     - The service will run automatically when docker is initiated.
+
+## Demo
+- https://140.112.90.200:9999/
